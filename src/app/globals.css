@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
+/* ===== VARIÁVEIS DE CORES ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cores principais do tema escuro */
+  --color-dark-primary: #111827; /* gray-900 */
+  --color-dark-secondary: #1f2937; /* gray-800 */
+  --color-dark-tertiary: #374151; /* gray-700 */
+
+  /* Cores de texto */
+  --color-text-primary: #f9fafb; /* gray-50 */
+  --color-text-secondary: #d1d5db; /* gray-300 */
+  --color-text-muted: #9ca3af; /* gray-400 */
+
+  /* Verde liquid glass */
+  --color-accent-primary: #10b981; /* emerald-500 */
+  --color-accent-hover: #059669; /* emerald-600 */
+  --color-accent-light: #6ee7b7; /* emerald-300 */
+
+  /* Backgrounds */
+  --color-bg-main: #0f172a; /* slate-900 */
+  --color-bg-secondary: #1e293b; /* slate-800 */
+  --color-bg-card: #334155; /* slate-700 */
+  --color-bg-glass: rgba(16, 185, 129, 0.1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ===== CLASSES UTILITÁRIAS ===== */
+.bg-dark-primary {
+  background-color: var(--color-dark-primary);
+}
+.bg-dark-secondary {
+  background-color: var(--color-dark-secondary);
+}
+.bg-dark-tertiary {
+  background-color: var(--color-dark-tertiary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.bg-main {
+  background-color: var(--color-bg-main);
+}
+.bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+.bg-card {
+  background-color: var(--color-bg-card);
+}
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+/* ===== EFEITO LIQUID GLASS ===== */
+.glass-accent {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.9) 0%,
+    rgba(5, 150, 105, 0.8) 50%,
+    rgba(16, 185, 129, 0.9) 100%
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-accent::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.glass-accent:hover::before {
+  left: 100%;
+}
+
+.glass-accent:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Variante mais sutil do glass */
+.glass-subtle {
+  background: rgba(16, 185, 129, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(16, 185, 129, 0.08);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+}
+
+.glass-subtle:hover {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* ===== TEMA ESCURO GLOBAL ===== */
+.theme-dark {
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-main) 0%,
+    var(--color-bg-secondary) 100%
+  );
+  color: var(--color-text-primary);
+}
+
+/* ===== CARDS COM GLASS EFFECT ===== */
+.card-glass {
+  background: rgba(51, 65, 85, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 0 0 1px rgba(255, 255, 255, 0.02);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-glass::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  opacity: 0.6;
+}
+
+.card-glass:hover {
+  transform: translateY(-3px);
+  background: rgba(51, 65, 85, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 1px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Variações de opacidade */
+.card-glass-light {
+  background: rgba(51, 65, 85, 0.08);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(148, 163, 184, 0.05);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.card-glass-medium {
+  background: rgba(51, 65, 85, 0.2);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.card-glass-heavy {
+  background: rgba(51, 65, 85, 0.35);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ===== ANIMAÇÕES ===== */
+.animate-liquid {
+  animation: liquid 3s ease-in-out infinite;
+}
+
+@keyframes liquid {
+  0%,
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
 }
