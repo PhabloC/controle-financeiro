@@ -9,11 +9,11 @@ const investmentData: InvestmentDataItem[] = [
 ];
 
 const investmentValues = {
-  "Renda Fixa": "R$ 85.000,00",
-  Ações: "R$ 53.125,00",
-  "Investimento Internacional": "R$ 31.875,00",
-  "Fundos Imobiliários": "R$ 25.500,00",
-  Criptomoeda: "R$ 17.000,00",
+  "Renda Fixa": "R$ 85.000",
+  Ações: "R$ 53.125",
+  "Investimento Internacional": "R$ 31.875",
+  "Fundos Imobiliários": "R$ 25.500",
+  Criptomoeda: "R$ 17.000",
 };
 
 export default function ApplicationsOverview() {

@@ -1,48 +1,93 @@
+"use client";
+
+import SalesOverview from "@/components/overview/applications-overview/ApplicationsOverview";
+import CardsMetrics from "@/components/overview/cards-metrics/CardsMetrics";
+import RightColumn from "@/components/overview/right-column/RightColumn";
+import { useState } from "react";
+
 export default function Home() {
+  const [selectedPeriod, setSelectedPeriod] = useState("Hoje");
+
   return (
-    <div className="p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-primary mb-8">
-          💰 Bem-vindo ao Controle Financeiro
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Card de receita */}
-          <div className="card-glass-light rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-primary">
-                Receita Total
-              </h2>
-              <div className="w-12 h-12 glass-accent rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📈</span>
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-primary">R$ 25.430,00</p>
-            <p className="text-sm text-muted mt-2">↗️ +12.5% este mês</p>
-          </div>
+    <div className="p-6">
+      {/* Header com boas-vindas */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            💰 Bem-vindo ao Controle Financeiro
+          </h1>
+          <p className="text-muted">
+            Gerencie seus investimentos e acompanhe sua evolução financeira
+          </p>
+        </div>
+        <select
+          value={selectedPeriod}
+          onChange={(e) => setSelectedPeriod(e.target.value)}
+          className="px-4 py-2 glass-subtle rounded-lg text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary border-0"
+        >
+          <option>Hoje</option>
+          <option>Essa Semana</option>
+          <option>Esse Mês</option>
+          <option>Este Ano</option>
+        </select>
+      </div>
 
-          {/* Card de despesas */}
-          <div className="card-glass-light rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-primary">Despesas</h2>
-              <div className="w-12 h-12 glass-subtle rounded-lg flex items-center justify-center">
-                <span className="text-2xl">📉</span>
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-red-400">R$ 15.250,00</p>
-            <p className="text-sm text-muted mt-2">↘️ -3.2% este mês</p>
-          </div>
+      {/* Cards de métricas principais */}
+      <CardsMetrics />
 
-          {/* Card de saldo */}
-          <div className="card-glass-medium rounded-xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-primary">Saldo</h2>
-              <div className="w-12 h-12 glass-accent rounded-lg flex items-center justify-center animate-liquid">
-                <span className="text-2xl">💎</span>
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-primary">R$ 10.180,00</p>
-            <p className="text-sm text-muted mt-2">💰 Lucro líquido</p>
+      {/* Layout principal com overview e coluna direita */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <SalesOverview />
+
+        {/* Coluna direita com informações adicionais */}
+        <RightColumn />
+      </div>
+
+      {/* Seção de ações rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div className="card-glass-light rounded-xl p-6 text-center">
+          <div className="w-12 h-12 glass-accent rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">�</span>
           </div>
+          <h3 className="text-lg font-semibold text-primary mb-2">
+            Novo Aporte
+          </h3>
+          <p className="text-sm text-muted mb-4">
+            Adicione novos investimentos ao seu portfólio
+          </p>
+          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+            Adicionar Aporte
+          </button>
+        </div>
+
+        <div className="card-glass-light rounded-xl p-6 text-center">
+          <div className="w-12 h-12 glass-accent rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">�</span>
+          </div>
+          <h3 className="text-lg font-semibold text-primary mb-2">
+            Relatórios
+          </h3>
+          <p className="text-sm text-muted mb-4">
+            Visualize relatórios detalhados dos seus investimentos
+          </p>
+          <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+            Ver Relatórios
+          </button>
+        </div>
+
+        <div className="card-glass-light rounded-xl p-6 text-center">
+          <div className="w-12 h-12 glass-accent rounded-lg flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">⚖️</span>
+          </div>
+          <h3 className="text-lg font-semibold text-primary mb-2">
+            Rebalancear
+          </h3>
+          <p className="text-sm text-muted mb-4">
+            Mantenha seu portfólio equilibrado conforme sua estratégia
+          </p>
+          <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+            Rebalancear
+          </button>
         </div>
       </div>
     </div>

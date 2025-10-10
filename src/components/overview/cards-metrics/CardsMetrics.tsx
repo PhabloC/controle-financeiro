@@ -1,26 +1,26 @@
 const metrics = [
   {
-    title: "Total Investido",
-    value: "$3,131,021",
-    subtitle: "42.5% vs last month",
+    title: "Patrimônio Total",
+    value: "R$ 212.500",
+    subtitle: "+15.2% vs mês anterior",
     type: "revenue",
   },
   {
-    title: "Rentabilidade Mensal",
-    value: "$1,511,121",
-    subtitle: "10% vs last month",
+    title: "Receita Mensal",
+    value: "R$ 25.430",
+    subtitle: "+12.5% vs mês anterior",
     type: "arr",
   },
   {
     title: "Rentabilidade Anual",
-    value: "71%",
-    subtitle: "",
+    value: "18.5%",
+    subtitle: "Acima da meta de 15%",
     type: "percentage",
   },
   {
     title: "Aportes do Mês",
-    value: "18,221",
-    subtitle: "3% vs last week",
+    value: "R$ 8.500",
+    subtitle: "Meta: R$ 10.000",
     type: "orders",
   },
 ];

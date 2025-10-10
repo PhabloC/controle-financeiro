@@ -199,3 +199,26 @@
     border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
   }
 }
+
+@keyframes slide-in-from-top {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top;
+}
+
+.duration-200 {
+  animation-duration: 200ms;
+}
