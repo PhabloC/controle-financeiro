@@ -222,3 +222,12 @@
 .duration-200 {
   animation-duration: 200ms;
 }
+
+/* ===== ESTILOS GLOBAIS PARA BOTÕES ===== */
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

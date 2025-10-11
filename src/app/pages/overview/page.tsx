@@ -9,21 +9,6 @@ import { useState } from "react";
 export default function Overview() {
   const [selectedPeriod, setSelectedPeriod] = useState("Today");
 
-  // Dados de exemplo para vendas (será usado futuramente)
-  // const salesData = [
-  //   { label: "Desktop", value: "$54,540", color: "#10B981" },
-  //   { label: "Mobile", value: "$11,420", color: "#3B82F6" },
-  //   { label: "Tablet", value: "$1,540", color: "#6366F1" },
-  //   { label: "Other", value: "$120", color: "#8B5CF6" },
-  // ];
-
-  // Dados de exemplo para clientes (será usado futuramente)
-  // const customers = [
-  //   { name: "Olivia Lau", deals: 1052, value: "$37,431", avatar: "👩" },
-  //   { name: "Paul Stewart", deals: 984, value: "$36,622", avatar: "👨" },
-  //   { name: "Daniel Stewart", deals: 834, value: "$35,569", avatar: "👨" },
-  // ];
-
   return (
     <ProtectedRoute>
       <div className="p-6">

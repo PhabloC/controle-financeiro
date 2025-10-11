@@ -17,7 +17,7 @@ export default function RightColumn() {
       <div className="bg-gradient-to-r from-blue-400 to-purple-500 p-6 rounded-xl text-white">
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm opacity-90">Meta Anual 2025</span>
-          <button className="text-white hover:text-blue-100">
+          <button className="text-white hover:text-blue-100 cursor-pointer p-2 rounded-md hover:bg-white/10 transition-colors">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
             </svg>
@@ -28,7 +28,7 @@ export default function RightColumn() {
           R$ 160.000 de R$ 210.000 investidos. Continue aportando para bater sua
           meta!
         </p>
-        <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
           Novo Aporte
         </button>
       </div>
@@ -73,7 +73,7 @@ export default function RightColumn() {
         <p className="text-sm opacity-90 mb-4">
           Suas ações estão acima do target (30%). Considere rebalancear.
         </p>
-        <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
           Rebalancear
         </button>
       </div>

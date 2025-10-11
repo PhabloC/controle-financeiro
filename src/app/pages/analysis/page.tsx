@@ -1,61 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CryptoData, FIIData, InternationalData, MarketData } from "./types";
+import MainIndices from "@/components/analise/main-indices/MainIndices";
+import AnalysisHeader from "@/components/analise/analysis-header";
+import MarketTabs from "@/components/analise/market-tabs";
+import CategoryFilter from "@/components/analise/category-filter";
+import MarketQuotes from "@/components/analise/market-quotes";
+import RightSidebar from "@/components/analise/right-sidebar";
 
 // Simulação de dados de mercado em tempo real
 const generateRandomPrice = (basePrice: number, volatility = 0.02) => {
   const change = (Math.random() - 0.5) * 2 * volatility;
   return basePrice * (1 + change);
 };
-
-interface MarketData {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  volume: string;
-  marketCap: string;
-  sector: string;
-}
-
-interface IndexData {
-  name: string;
-  value: number;
-  change: number;
-  changePercent: number;
-}
-
-interface FIIData {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  dividendYield: number;
-  pvp: number;
-  sector: string;
-}
-
-interface CryptoData {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  marketCap: string;
-  volume24h: string;
-}
-
-interface InternationalData {
-  symbol: string;
-  name: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  currency: string;
-  exchange: string;
-}
 
 export default function Analysis() {
   const [selectedPeriod, setSelectedPeriod] = useState("1D");
@@ -122,13 +80,6 @@ export default function Analysis() {
       marketCap: "R$ 89.2B",
       sector: "Industriais",
     },
-  ]);
-
-  const [indices, setIndices] = useState<IndexData[]>([
-    { name: "Ibovespa", value: 125840, change: 1250, changePercent: 1.0 },
-    { name: "IBrX 100", value: 68450, change: -320, changePercent: -0.47 },
-    { name: "Small Cap", value: 3240, change: 85, changePercent: 2.7 },
-    { name: "IFIX", value: 2890, change: 12, changePercent: 0.42 },
   ]);
 
   const [fiiData, setFiiData] = useState<FIIData[]>([
@@ -272,21 +223,6 @@ export default function Analysis() {
         })
       );
 
-      setIndices((prev) =>
-        prev.map((index) => {
-          const newValue = generateRandomPrice(index.value, 0.002);
-          const change = newValue - index.value;
-          const changePercent = (change / index.value) * 100;
-
-          return {
-            ...index,
-            value: Math.round(newValue),
-            change: Math.round(change),
-            changePercent: Number(changePercent.toFixed(2)),
-          };
-        })
-      );
-
       // Atualizar FIIs
       setFiiData((prev) =>
         prev.map((fii) => {
@@ -339,16 +275,6 @@ export default function Analysis() {
     return () => clearInterval(interval);
   }, []);
 
-  const categories = [
-    "Todos",
-    "Bancos",
-    "Energia",
-    "Mineração",
-    "Varejo",
-    "Industriais",
-  ];
-  const tabs = ["Ações", "FIIs", "Cripto", "Internacional"];
-
   const filteredData =
     selectedCategory === "Todos"
       ? marketData
@@ -356,606 +282,37 @@ export default function Analysis() {
 
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            📈 Análise de Mercado
-          </h1>
-          <p className="text-muted">
-            Acompanhe as cotações em tempo real e análise técnica dos ativos
-          </p>
-        </div>
-        <div className="flex space-x-3">
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-4 py-2 glass-subtle rounded-lg text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary border-0"
-          >
-            <option>1D</option>
-            <option>5D</option>
-            <option>1M</option>
-            <option>3M</option>
-            <option>1A</option>
-          </select>
-        </div>
-      </div>
+      <AnalysisHeader
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
+      />
 
-      {/* Índices Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {indices.map((index) => (
-          <div key={index.name} className="card-glass-light p-6 rounded-xl">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted">{index.name}</h3>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            </div>
-            <div className="text-2xl font-bold text-primary mb-1">
-              {index.value.toLocaleString("pt-BR")}
-            </div>
-            <div
-              className={`text-sm font-medium flex items-center ${
-                index.change >= 0 ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              <span className="mr-1">{index.change >= 0 ? "↗️" : "↘️"}</span>
-              {index.change >= 0 ? "+" : ""}
-              {index.change.toLocaleString("pt-BR")} (
-              {index.changePercent >= 0 ? "+" : ""}
-              {index.changePercent}%)
-            </div>
-          </div>
-        ))}
-      </div>
+      <MainIndices />
 
-      {/* Abas de Navegação */}
-      <div className="flex space-x-2 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
-              activeTab === tab
-                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105"
-                : "glass-subtle text-secondary hover:text-primary hover:bg-dark-secondary hover:scale-102"
-            }`}
-          >
-            {tab === "FIIs" && "🏢"}
-            {tab === "Cripto" && "₿"}
-            {tab === "Internacional" && "🌍"}
-            {tab === "Ações" && "📊"}
-            <span className="ml-2">{tab}</span>
-          </button>
-        ))}
-      </div>
+      <MarketTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Filtros (apenas para ações) */}
-      {activeTab === "Ações" && (
-        <div className="flex space-x-2 mb-6">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                selectedCategory === category
-                  ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                  : "glass-subtle text-secondary hover:text-primary hover:bg-dark-secondary"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      )}
+      <CategoryFilter
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        show={activeTab === "Ações"}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Lista de Cotações em Tempo Real */}
-        <div className="lg:col-span-2 card-glass-medium p-6 rounded-xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-primary">
-              {activeTab} - Cotações em Tempo Real
-            </h2>
-            <div className="flex items-center space-x-2 text-green-400">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm">Ao Vivo</span>
-            </div>
-          </div>
+        <MarketQuotes
+          activeTab={activeTab}
+          fiiData={fiiData}
+          cryptoData={cryptoData}
+          internationalData={internationalData}
+          filteredData={filteredData}
+        />
 
-          <div className="space-y-3">
-            {activeTab === "Ações" &&
-              filteredData.map((stock) => (
-                <div
-                  key={stock.symbol}
-                  className="glass-subtle p-4 rounded-lg hover:bg-dark-secondary transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-sm text-secondary">
-                          {stock.name}
-                        </div>
-                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
-                          {stock.sector}
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted mt-1">
-                        Vol: {stock.volume} • Cap: {stock.marketCap}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-primary">
-                        R$ {stock.price.toFixed(2)}
-                      </div>
-                      <div
-                        className={`text-sm font-medium flex items-center justify-end ${
-                          stock.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                      >
-                        <span className="mr-1">
-                          {stock.change >= 0 ? "↗️" : "↘️"}
-                        </span>
-                        {stock.change >= 0 ? "+" : ""}R${" "}
-                        {stock.change.toFixed(2)} (
-                        {stock.changePercent >= 0 ? "+" : ""}
-                        {stock.changePercent}%)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {activeTab === "FIIs" &&
-              fiiData.map((fii) => (
-                <div
-                  key={fii.symbol}
-                  className="glass-subtle p-4 rounded-lg hover:bg-dark-secondary transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-primary">
-                          {fii.symbol}
-                        </div>
-                        <div className="text-sm text-secondary">{fii.name}</div>
-                        <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
-                          {fii.sector}
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted mt-1">
-                        DY: {fii.dividendYield}% • P/VP: {fii.pvp}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-primary">
-                        R$ {fii.price.toFixed(2)}
-                      </div>
-                      <div
-                        className={`text-sm font-medium flex items-center justify-end ${
-                          fii.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                      >
-                        <span className="mr-1">
-                          {fii.change >= 0 ? "↗️" : "↘️"}
-                        </span>
-                        {fii.change >= 0 ? "+" : ""}R$ {fii.change.toFixed(2)} (
-                        {fii.changePercent >= 0 ? "+" : ""}
-                        {fii.changePercent}%)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {activeTab === "Cripto" &&
-              cryptoData.map((crypto) => (
-                <div
-                  key={crypto.symbol}
-                  className="glass-subtle p-4 rounded-lg hover:bg-dark-secondary transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-primary">
-                          {crypto.symbol}
-                        </div>
-                        <div className="text-sm text-secondary">
-                          {crypto.name}
-                        </div>
-                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
-                          Cripto
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted mt-1">
-                        Vol 24h: {crypto.volume24h} • Cap: {crypto.marketCap}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-primary">
-                        R${" "}
-                        {crypto.price.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </div>
-                      <div
-                        className={`text-sm font-medium flex items-center justify-end ${
-                          crypto.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                      >
-                        <span className="mr-1">
-                          {crypto.change >= 0 ? "🚀" : "📉"}
-                        </span>
-                        {crypto.change >= 0 ? "+" : ""}R${" "}
-                        {crypto.change.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}{" "}
-                        ({crypto.changePercent >= 0 ? "+" : ""}
-                        {crypto.changePercent}%)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {activeTab === "Internacional" &&
-              internationalData.map((stock) => (
-                <div
-                  key={stock.symbol}
-                  className="glass-subtle p-4 rounded-lg hover:bg-dark-secondary transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-sm text-secondary">
-                          {stock.name}
-                        </div>
-                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
-                          {stock.exchange}
-                        </span>
-                      </div>
-                      <div className="text-xs text-muted mt-1">
-                        Moeda: {stock.currency}
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-primary">
-                        ${stock.price.toFixed(2)}
-                      </div>
-                      <div
-                        className={`text-sm font-medium flex items-center justify-end ${
-                          stock.change >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                      >
-                        <span className="mr-1">
-                          {stock.change >= 0 ? "↗️" : "↘️"}
-                        </span>
-                        {stock.change >= 0 ? "+" : ""}${stock.change.toFixed(2)}{" "}
-                        ({stock.changePercent >= 0 ? "+" : ""}
-                        {stock.changePercent}%)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Análise e Alertas */}
-        <div className="space-y-6">
-          {/* Análise Técnica Rápida */}
-          <div className="card-glass-light p-6 rounded-xl">
-            <h3 className="text-lg font-semibold text-primary mb-4">
-              Análise Técnica
-            </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-secondary">RSI (14)</span>
-                <span className="text-sm font-medium text-primary">68.5</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-secondary">MACD</span>
-                <span className="text-sm font-medium text-green-400">
-                  Compra
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-secondary">Médias Móveis</span>
-                <span className="text-sm font-medium text-green-400">
-                  Bullish
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-secondary">Volume</span>
-                <span className="text-sm font-medium text-yellow-400">
-                  Normal
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Principais Altas */}
-          <div className="card-glass-light p-6 rounded-xl">
-            <h3 className="text-lg font-semibold text-primary mb-4">
-              🚀 Maiores Altas - {activeTab}
-            </h3>
-            <div className="space-y-3">
-              {activeTab === "Ações" &&
-                marketData
-                  .filter((stock) => stock.changePercent > 0)
-                  .sort((a, b) => b.changePercent - a.changePercent)
-                  .slice(0, 3)
-                  .map((stock) => (
-                    <div
-                      key={stock.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-xs text-muted">{stock.sector}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">
-                          +{stock.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "FIIs" &&
-                fiiData
-                  .filter((fii) => fii.changePercent > 0)
-                  .sort((a, b) => b.changePercent - a.changePercent)
-                  .slice(0, 3)
-                  .map((fii) => (
-                    <div
-                      key={fii.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {fii.symbol}
-                        </div>
-                        <div className="text-xs text-muted">
-                          DY: {fii.dividendYield}%
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">
-                          +{fii.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "Cripto" &&
-                cryptoData
-                  .filter((crypto) => crypto.changePercent > 0)
-                  .sort((a, b) => b.changePercent - a.changePercent)
-                  .slice(0, 3)
-                  .map((crypto) => (
-                    <div
-                      key={crypto.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {crypto.symbol}
-                        </div>
-                        <div className="text-xs text-muted">{crypto.name}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">
-                          +{crypto.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "Internacional" &&
-                internationalData
-                  .filter((stock) => stock.changePercent > 0)
-                  .sort((a, b) => b.changePercent - a.changePercent)
-                  .slice(0, 3)
-                  .map((stock) => (
-                    <div
-                      key={stock.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-xs text-muted">
-                          {stock.exchange}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">
-                          +{stock.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-            </div>
-          </div>
-
-          {/* Principais Baixas */}
-          <div className="card-glass-light p-6 rounded-xl">
-            <h3 className="text-lg font-semibold text-primary mb-4">
-              📉 Maiores Baixas - {activeTab}
-            </h3>
-            <div className="space-y-3">
-              {activeTab === "Ações" &&
-                marketData
-                  .filter((stock) => stock.changePercent < 0)
-                  .sort((a, b) => a.changePercent - b.changePercent)
-                  .slice(0, 3)
-                  .map((stock) => (
-                    <div
-                      key={stock.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-xs text-muted">{stock.sector}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-red-400">
-                          {stock.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "FIIs" &&
-                fiiData
-                  .filter((fii) => fii.changePercent < 0)
-                  .sort((a, b) => a.changePercent - b.changePercent)
-                  .slice(0, 3)
-                  .map((fii) => (
-                    <div
-                      key={fii.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {fii.symbol}
-                        </div>
-                        <div className="text-xs text-muted">
-                          P/VP: {fii.pvp}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-red-400">
-                          {fii.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "Cripto" &&
-                cryptoData
-                  .filter((crypto) => crypto.changePercent < 0)
-                  .sort((a, b) => a.changePercent - b.changePercent)
-                  .slice(0, 3)
-                  .map((crypto) => (
-                    <div
-                      key={crypto.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {crypto.symbol}
-                        </div>
-                        <div className="text-xs text-muted">{crypto.name}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-red-400">
-                          {crypto.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              {activeTab === "Internacional" &&
-                internationalData
-                  .filter((stock) => stock.changePercent < 0)
-                  .sort((a, b) => a.changePercent - b.changePercent)
-                  .slice(0, 3)
-                  .map((stock) => (
-                    <div
-                      key={stock.symbol}
-                      className="flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="text-sm font-medium text-primary">
-                          {stock.symbol}
-                        </div>
-                        <div className="text-xs text-muted">
-                          {stock.exchange}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-red-400">
-                          {stock.changePercent}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-            </div>
-          </div>
-
-          {/* Alertas de Trading Dinâmicos */}
-          {activeTab === "Ações" && (
-            <div className="bg-gradient-to-r from-blue-400 to-purple-500 p-6 rounded-xl text-white">
-              <div className="flex items-center mb-3">
-                <span className="text-2xl mr-2">⚡</span>
-                <span className="text-sm font-medium">Alerta de Breakout</span>
-              </div>
-              <p className="text-sm opacity-90 mb-4">
-                PETR4 rompeu resistência de R$ 32. Volume acima da média.
-              </p>
-              <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Ver Análise
-              </button>
-            </div>
-          )}
-
-          {activeTab === "FIIs" && (
-            <div className="bg-gradient-to-r from-green-400 to-teal-500 p-6 rounded-xl text-white">
-              <div className="flex items-center mb-3">
-                <span className="text-2xl mr-2">🏢</span>
-                <span className="text-sm font-medium">Oportunidade FII</span>
-              </div>
-              <p className="text-sm opacity-90 mb-4">
-                HGLG11 com DY de 8.5% e P/VP abaixo de 1.0. Boa oportunidade de
-                compra.
-              </p>
-              <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Analisar FII
-              </button>
-            </div>
-          )}
-
-          {activeTab === "Cripto" && (
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-xl text-white">
-              <div className="flex items-center mb-3">
-                <span className="text-2xl mr-2">₿</span>
-                <span className="text-sm font-medium">Alerta Cripto</span>
-              </div>
-              <p className="text-sm opacity-90 mb-4">
-                Bitcoin testando suporte de R$ 270k. Alta volatilidade esperada.
-              </p>
-              <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Ver Gráfico
-              </button>
-            </div>
-          )}
-
-          {activeTab === "Internacional" && (
-            <div className="bg-gradient-to-r from-purple-400 to-pink-500 p-6 rounded-xl text-white">
-              <div className="flex items-center mb-3">
-                <span className="text-2xl mr-2">🌍</span>
-                <span className="text-sm font-medium">
-                  Mercado Internacional
-                </span>
-              </div>
-              <p className="text-sm opacity-90 mb-4">
-                TSLA com forte alta de 5.25%. Setor de tecnologia em
-                recuperação.
-              </p>
-              <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Ver NYSE
-              </button>
-            </div>
-          )}
-        </div>
+        <RightSidebar
+          activeTab={activeTab}
+          marketData={marketData}
+          fiiData={fiiData}
+          cryptoData={cryptoData}
+          internationalData={internationalData}
+        />
       </div>
     </div>
   );

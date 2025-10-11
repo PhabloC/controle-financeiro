@@ -9,12 +9,13 @@ interface ClientLayoutProps {
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/pages/login";
+  const isAuthPage =
+    pathname === "/pages/login" || pathname === "/pages/cadastro";
 
   return (
-    <div className={isLoginPage ? "" : "flex h-screen"}>
-      {!isLoginPage && <Sidebar />}
-      <main className={isLoginPage ? "" : "flex-1 overflow-y-auto bg-main"}>
+    <div className={isAuthPage ? "" : "flex h-screen"}>
+      {!isAuthPage && <Sidebar />}
+      <main className={isAuthPage ? "" : "flex-1 overflow-y-auto bg-main"}>
         {children}
       </main>
     </div>

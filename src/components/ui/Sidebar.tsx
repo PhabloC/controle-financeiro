@@ -181,7 +181,7 @@ export default function Sidebar() {
                 handleNavigation("Perfil", "/pages/profile");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 ${
+              className={`cursor-pointer w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 ${
                 activeItem === "Perfil"
                   ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-white"
                   : "text-secondary hover:bg-gradient-to-r hover:from-gray-500/10 hover:to-gray-400/10 hover:text-primary"
@@ -201,7 +201,7 @@ export default function Sidebar() {
                 handleLogout();
                 setIsDropdownOpen(false);
               }}
-              className="w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 text-secondary hover:bg-gradient-to-r hover:from-red-500/10 hover:to-red-400/10 hover:text-red-400"
+              className="cursor-pointer w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 text-secondary hover:bg-gradient-to-r hover:from-red-500/10 hover:to-red-400/10 hover:text-red-400"
             >
               <span className="text-lg">🚪</span>
               <span className="text-sm font-medium">Sair</span>

@@ -55,7 +55,7 @@ export default function Home() {
           <p className="text-sm text-muted mb-4">
             Adicione novos investimentos ao seu portfólio
           </p>
-          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer">
             Adicionar Aporte
           </button>
         </div>
@@ -70,7 +70,7 @@ export default function Home() {
           <p className="text-sm text-muted mb-4">
             Visualize relatórios detalhados dos seus investimentos
           </p>
-          <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+          <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer">
             Ver Relatórios
           </button>
         </div>
@@ -85,7 +85,7 @@ export default function Home() {
           <p className="text-sm text-muted mb-4">
             Mantenha seu portfólio equilibrado conforme sua estratégia
           </p>
-          <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+          <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer">
             Rebalancear
           </button>
         </div>

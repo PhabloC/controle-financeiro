@@ -24,10 +24,10 @@ export default function ApplicationsOverview() {
           Portfólio de Investimentos
         </h2>
         <div className="flex space-x-2">
-          <button className="text-sm text-muted hover:text-secondary transition-colors">
+          <button className="text-sm text-muted hover:text-secondary transition-colors cursor-pointer px-3 py-1 rounded-md hover:bg-gray-700/20">
             Mensal
           </button>
-          <button className="text-sm glass-accent px-3 py-1 rounded-md font-medium text-white">
+          <button className="text-sm glass-accent px-3 py-1 rounded-md font-medium text-white cursor-pointer">
             Anual
           </button>
         </div>

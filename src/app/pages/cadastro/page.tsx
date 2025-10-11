@@ -4,17 +4,15 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 
-type AuthMode = "signin" | "reset";
-
-export default function LoginPage() {
-  const [mode, setMode] = useState<AuthMode>("signin");
+export default function CadastroPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
-  const { signIn, resetPassword, user } = useAuth();
+  const { signUp, user } = useAuth();
   const router = useRouter();
 
   // Redirecionar se já estiver logado
@@ -30,22 +28,21 @@ export default function LoginPage() {
     setMessage("");
 
     try {
-      let result;
-      switch (mode) {
-        case "signin":
-          result = await signIn(email, password);
-          break;
-        case "reset":
-          result = await resetPassword(email);
-          break;
+      if (password !== confirmPassword) {
+        setMessage("As senhas não coincidem");
+        setMessageType("error");
+        setIsLoading(false);
+        return;
       }
+
+      const result = await signUp(email, password);
 
       if (result.error) {
         let errorMessage = "Ocorreu um erro. Tente novamente.";
 
         switch (result.error.message) {
-          case "Invalid login credentials":
-            errorMessage = "Email ou senha incorretos";
+          case "User already registered":
+            errorMessage = "Este email já está cadastrado";
             break;
           case "Password should be at least 6 characters":
             errorMessage = "A senha deve ter pelo menos 6 caracteres";
@@ -57,38 +54,20 @@ export default function LoginPage() {
         setMessage(errorMessage);
         setMessageType("error");
       } else {
-        if (mode === "reset") {
-          setMessage(
-            "Email de recuperação enviado! Verifique sua caixa de entrada."
-          );
-          setMessageType("success");
-          setMode("signin");
-        }
+        setMessage(
+          "Conta criada com sucesso! Verifique seu email para confirmar."
+        );
+        setMessageType("success");
+        // Redirecionar para login após sucesso
+        setTimeout(() => {
+          router.push("/pages/login");
+        }, 2000);
       }
     } catch {
       setMessage("Erro inesperado. Tente novamente.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const getTitle = () => {
-    switch (mode) {
-      case "signin":
-        return "🔐 Entrar";
-      case "reset":
-        return "🔄 Recuperar Senha";
-    }
-  };
-
-  const getSubmitText = () => {
-    if (isLoading) return "Carregando...";
-    switch (mode) {
-      case "signin":
-        return "Entrar";
-      case "reset":
-        return "Enviar Email";
     }
   };
 
@@ -100,11 +79,10 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary mb-2">
-              {getTitle()}
+              👤 Criar Conta
             </h1>
             <p className="text-secondary">
-              {mode === "signin" && "Acesse sua conta para continuar"}
-              {mode === "reset" && "Digite seu email para recuperar a senha"}
+              Crie sua conta para começar a usar o sistema
             </p>
           </div>
 
@@ -143,26 +121,44 @@ export default function LoginPage() {
             </div>
 
             {/* Senha */}
-            {mode !== "reset" && (
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-primary mb-2"
-                >
-                  Senha
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 glass-subtle rounded-lg text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary border-0"
-                  placeholder="Sua senha"
-                />
-              </div>
-            )}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-primary mb-2"
+              >
+                Senha
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 glass-subtle rounded-lg text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary border-0"
+                placeholder="Sua senha (mínimo 6 caracteres)"
+              />
+            </div>
+
+            {/* Confirmar Senha */}
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-primary mb-2"
+              >
+                Confirmar Senha
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 glass-subtle rounded-lg text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-primary border-0"
+                placeholder="Confirme sua senha"
+              />
+            </div>
 
             {/* Botão Submit */}
             <button
@@ -170,43 +166,22 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full py-3 px-6 bg-accent-primary hover:bg-accent-hover text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              {getSubmitText()}
+              {isLoading ? "Criando conta..." : "Criar Conta"}
             </button>
           </form>
 
-          {/* Links de Navegação */}
-          <div className="mt-8 space-y-4 text-center">
-            {mode === "signin" && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setMode("reset")}
-                  className="text-accent-primary hover:text-accent-light text-sm transition-colors cursor-pointer px-3 py-2 rounded-md hover:bg-accent-primary/10"
-                >
-                  Esqueceu sua senha?
-                </button>
-                <div className="text-secondary text-sm">
-                  Não tem uma conta?{" "}
-                  <button
-                    type="button"
-                    onClick={() => router.push("/pages/cadastro")}
-                    className="text-accent-primary hover:text-accent-light transition-colors cursor-pointer px-2 py-1 rounded hover:bg-accent-primary/10"
-                  >
-                    Criar conta
-                  </button>
-                </div>
-              </>
-            )}
-
-            {mode === "reset" && (
+          {/* Link para Login */}
+          <div className="mt-8 text-center">
+            <div className="text-secondary text-sm">
+              Já tem uma conta?{" "}
               <button
                 type="button"
-                onClick={() => setMode("signin")}
-                className="text-accent-primary hover:text-accent-light text-sm transition-colors cursor-pointer px-3 py-2 rounded-md hover:bg-accent-primary/10"
+                onClick={() => router.push("/pages/login")}
+                className="text-accent-primary hover:text-accent-light transition-colors cursor-pointer px-2 py-1 rounded hover:bg-accent-primary/10"
               >
-                Voltar para login
+                Entrar
               </button>
-            )}
+            </div>
           </div>
         </div>
 
