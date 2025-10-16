@@ -16,7 +16,7 @@ export default function Sidebar() {
     // Atualiza o item ativo baseado na rota atual
     if (pathname === "/pages/overview") {
       setActiveItem("Overview");
-    } else if (pathname === "/pages/analysis") {
+
       setActiveItem("Análise");
     } else if (pathname === "/pages/revenue") {
       setActiveItem("Receita");
@@ -70,7 +70,7 @@ export default function Sidebar() {
             <span className="text-white font-bold text-lg">💰</span>
           </div>
           <span className="text-xl font-semibold text-primary">
-            Phablo Carvalho
+            Puxar nome do perfil
           </span>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function Sidebar() {
                 icon: "📊",
                 path: "/pages/overview",
               },
-              { name: "Análise", icon: "📈", path: "/pages/analysis" },
+
               { name: "Receita", icon: "💰", path: "/pages/revenue" },
             ].map((item) => (
               <button

@@ -14,62 +14,12 @@ import {
 
 export default function Revenue() {
   const [selectedTab, setSelectedTab] = useState("Portfolio");
-  const [investments, setInvestments] = useState<Investment[]>([
-    {
-      id: "1",
-      name: "Petrobras PN",
-      symbol: "PETR4",
-      type: "Ação",
-      quantity: 100,
-      purchasePrice: 28.5,
-      currentPrice: 32.45,
-      purchaseDate: "2024-08-15",
-      sector: "Energia",
-    },
-    {
-      id: "2",
-      name: "Vale ON",
-      symbol: "VALE3",
-      type: "Ação",
-      quantity: 50,
-      purchasePrice: 65.2,
-      currentPrice: 68.72,
-      purchaseDate: "2024-07-22",
-      sector: "Mineração",
-    },
-    {
-      id: "3",
-      name: "CSHG Logística",
-      symbol: "HGLG11",
-      type: "FII",
-      quantity: 20,
-      purchasePrice: 145.0,
-      currentPrice: 158.45,
-      purchaseDate: "2024-06-10",
-      sector: "Logística",
-    },
-    {
-      id: "4",
-      name: "Tesouro IPCA+ 2029",
-      symbol: "TPCA29",
-      type: "Renda Fixa",
-      quantity: 1,
-      purchasePrice: 15000.0,
-      currentPrice: 15450.0,
-      purchaseDate: "2024-05-20",
-    },
-    {
-      id: "5",
-      name: "Apple Inc.",
-      symbol: "AAPL",
-      type: "Internacional",
-      quantity: 10,
-      purchasePrice: 168.5,
-      currentPrice: 175.45,
-      purchaseDate: "2024-09-05",
-      exchange: "NASDAQ",
-    },
-  ]);
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(
+    null
+  );
 
   const [newInvestment, setNewInvestment] = useState({
     name: "",
@@ -131,14 +81,16 @@ export default function Revenue() {
 
   const handleAddInvestment = () => {
     if (
-      newInvestment.name &&
-      newInvestment.symbol &&
+      newInvestment.name.trim() &&
+      newInvestment.symbol.trim() &&
       newInvestment.quantity > 0 &&
       newInvestment.purchasePrice > 0
     ) {
       const investment: Investment = {
         id: Date.now().toString(),
         ...newInvestment,
+        name: newInvestment.name.trim(),
+        symbol: newInvestment.symbol.trim().toUpperCase(),
         currentPrice: newInvestment.purchasePrice, // Inicialmente igual ao preço de compra
       };
 
@@ -151,7 +103,90 @@ export default function Revenue() {
         purchasePrice: 0,
         purchaseDate: new Date().toISOString().split("T")[0],
       });
+
+      // Mostrar mensagem de sucesso e voltar para o Portfolio
+      setSuccessMessage("Investimento adicionado com sucesso!");
+      setShowSuccessMessage(true);
+      setSelectedTab("Portfolio");
+
+      // Ocultar mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
     }
+  };
+
+  const handleEditInvestment = (investment: Investment) => {
+    setEditingInvestment(investment);
+    setNewInvestment({
+      name: investment.name,
+      symbol: investment.symbol,
+      type: investment.type,
+      quantity: investment.quantity,
+      purchasePrice: investment.purchasePrice,
+      purchaseDate: investment.purchaseDate,
+    });
+    setSelectedTab("Adicionar");
+  };
+
+  const handleUpdateInvestment = () => {
+    if (
+      editingInvestment &&
+      newInvestment.name.trim() &&
+      newInvestment.symbol.trim() &&
+      newInvestment.quantity > 0 &&
+      newInvestment.purchasePrice > 0
+    ) {
+      const updatedInvestment: Investment = {
+        ...editingInvestment,
+        name: newInvestment.name.trim(),
+        symbol: newInvestment.symbol.trim().toUpperCase(),
+        type: newInvestment.type,
+        quantity: newInvestment.quantity,
+        purchasePrice: newInvestment.purchasePrice,
+        purchaseDate: newInvestment.purchaseDate,
+      };
+
+      setInvestments(
+        investments.map((inv) =>
+          inv.id === editingInvestment.id ? updatedInvestment : inv
+        )
+      );
+
+      // Limpar estado de edição
+      setEditingInvestment(null);
+      setNewInvestment({
+        name: "",
+        symbol: "",
+        type: "Ação",
+        quantity: 0,
+        purchasePrice: 0,
+        purchaseDate: new Date().toISOString().split("T")[0],
+      });
+
+      // Mostrar mensagem de sucesso e voltar para o Portfolio
+      setSuccessMessage("Investimento atualizado com sucesso!");
+      setShowSuccessMessage(true);
+      setSelectedTab("Portfolio");
+
+      // Ocultar mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingInvestment(null);
+    setNewInvestment({
+      name: "",
+      symbol: "",
+      type: "Ação",
+      quantity: 0,
+      purchasePrice: 0,
+      purchaseDate: new Date().toISOString().split("T")[0],
+    });
+    setSelectedTab("Portfolio");
   };
 
   const handleRemoveInvestment = (id: string) => {
@@ -165,6 +200,16 @@ export default function Revenue() {
       <RevenueHeader onAddInvestmentClick={() => setSelectedTab("Adicionar")} />
 
       <FinancialSummary summary={summary} />
+
+      {/* Mensagem de Sucesso */}
+      {showSuccessMessage && (
+        <div className="mb-4 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <span className="text-green-400">✓</span>
+            <span className="text-green-400 font-medium">{successMessage}</span>
+          </div>
+        </div>
+      )}
 
       <NavigationTabs
         tabs={tabs}
@@ -180,6 +225,7 @@ export default function Revenue() {
             <PortfolioList
               investments={investments}
               onRemoveInvestment={handleRemoveInvestment}
+              onEditInvestment={handleEditInvestment}
             />
           )}
 
@@ -188,6 +234,9 @@ export default function Revenue() {
               newInvestment={newInvestment}
               onInvestmentChange={setNewInvestment}
               onAddInvestment={handleAddInvestment}
+              onUpdateInvestment={handleUpdateInvestment}
+              onCancelEdit={handleCancelEdit}
+              editingInvestment={editingInvestment}
             />
           )}
 
