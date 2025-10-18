@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useAvatar } from "@/hooks/useAvatar";
 import { supabase } from "@/lib/supabase";
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const { avatar, setAvatar } = useAvatar();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [avatar, setAvatar] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -34,95 +35,138 @@ export default function ProfilePage() {
       // Validar o arquivo
       if (!file.type.startsWith("image/")) {
         alert("Por favor, selecione uma imagem válida (JPG, PNG, etc.).");
+        setIsUploading(false);
         return;
       }
 
       if (file.size > 2 * 1024 * 1024) {
-        // 2MB
         alert("A imagem deve ter no máximo 2MB.");
+        setIsUploading(false);
         return;
       }
 
       console.log("Iniciando upload do avatar...", {
-        fileName: `${user.id}.jpg`,
+        userId: user.id,
         fileSize: file.size,
         fileType: file.type,
-        userId: user.id,
       });
 
-      // Upload para o bucket 'avatars' com o nome sendo o ID do usuário
-      const fileName = `${user.id}.jpg`;
+      // Verificar a sessão atual
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        alert("Sessão expirada. Faça login novamente.");
+        setIsUploading(false);
+        return;
+      }
+
+      console.log("Sessão verificada:", {
+        hasSession: !!session,
+        userId: session.user?.id,
+      });
+
+      // Gerar nome do arquivo - usar sempre .png para consistência
+      const fileExtension = file.type.split("/")[1] || "png";
+      const fileName = `${user.id}.${fileExtension}`;
+      const filePath = fileName; // Pode adicionar subpasta se necessário: `avatars/${fileName}`
+
+      console.log("Tentando upload para:", filePath);
+
+      // Tentar remover arquivo antigo primeiro (se existir)
+      try {
+        await supabase.storage.from("avatars").remove([filePath]);
+        console.log("Arquivo antigo removido (se existia)");
+      } catch (removeError) {
+        console.log("Nenhum arquivo antigo para remover:", removeError);
+      }
+
+      // Upload para o bucket 'avatars'
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(fileName, file, {
-          upsert: true, // Substitui se já existir
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
         });
 
       console.log("Resultado do upload:", { uploadData, uploadError });
 
       if (uploadError) {
+        console.error("Erro detalhado do upload:", {
+          message: uploadError.message,
+          name: uploadError.name,
+        });
+
         // Tratamento específico de erros
-        if (uploadError.message.includes("Bucket not found")) {
+        if (uploadError.message.includes("row-level security")) {
           alert(
-            'Erro: Bucket "avatars" não encontrado no Supabase. Verifique a configuração do Storage.'
+            "Erro de permissão. Verifique se as políticas do bucket 'avatars' estão configuradas corretamente para usuários autenticados."
           );
-        } else if (uploadError.message.includes("Policy")) {
+        } else if (uploadError.message.includes("Bucket not found")) {
           alert(
-            'Erro de permissão: Verifique as políticas de segurança do bucket "avatars".'
+            'O bucket "avatars" não foi encontrado. Crie-o no Supabase Storage.'
           );
-        } else if (uploadError.message.includes("Invalid JWT")) {
-          alert("Erro de autenticação: Faça login novamente.");
+        } else if (
+          uploadError.message.includes("JWT") ||
+          uploadError.message.includes("expired")
+        ) {
+          alert("Sua sessão expirou. Faça login novamente.");
         } else {
           alert(`Erro no upload: ${uploadError.message}`);
         }
-        console.error("Erro detalhado do upload:", uploadError);
+        setIsUploading(false);
         return;
       }
 
-      // Obter a URL pública
-      const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+      console.log("Upload realizado com sucesso!");
 
-      console.log("URL pública gerada:", data);
+      // Obter a URL pública da imagem
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
 
-      if (data?.publicUrl) {
-        // Atualizar o avatar_url nos metadados do usuário
+      console.log("URL pública gerada:", urlData);
+
+      if (urlData?.publicUrl) {
+        // Adicionar timestamp para forçar atualização da imagem
+        const avatarUrlWithTimestamp = `${urlData.publicUrl}?t=${Date.now()}`;
+
+        // Atualizar os metadados do usuário
         const { error: updateError } = await supabase.auth.updateUser({
           data: {
-            avatar_url: data.publicUrl,
+            avatar_url: urlData.publicUrl,
           },
         });
 
         if (updateError) {
           console.error("Erro ao atualizar metadados:", updateError);
-          alert(
-            "Upload realizado, mas erro ao salvar nos metadados do usuário."
-          );
+          alert("Upload realizado, mas erro ao salvar nos metadados.");
         } else {
-          console.log("Metadados atualizados com sucesso");
+          console.log("Metadados atualizados com sucesso!");
         }
 
-        // Atualizar o estado local
-        setAvatar(data.publicUrl);
-        alert("Avatar atualizado com sucesso!");
-        console.log("Avatar atualizado com sucesso!");
+        // Atualizar o estado local com timestamp
+        setAvatar(avatarUrlWithTimestamp);
+        alert("Avatar atualizado com sucesso! ✅");
       } else {
-        alert("Erro: Não foi possível gerar a URL pública da imagem.");
+        alert("Erro: Não foi possível gerar a URL pública.");
       }
     } catch (error: unknown) {
-      console.error("Erro geral no upload do avatar:", error);
+      console.error("Erro geral no upload:", error);
 
-      // Tratamento de erros específicos
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      if (errorMessage.includes("NetworkError")) {
-        alert("Erro de rede. Verifique sua conexão e tente novamente.");
+      if (
+        errorMessage.includes("NetworkError") ||
+        errorMessage.includes("fetch")
+      ) {
+        alert("Erro de rede. Verifique sua conexão.");
       } else if (errorMessage.includes("CORS")) {
         alert("Erro de CORS. Verifique as configurações do Supabase.");
       } else {
-        alert(
-          `Erro inesperado: ${errorMessage || "Tente novamente mais tarde."}`
-        );
+        alert(`Erro inesperado: ${errorMessage}`);
       }
     } finally {
       setIsUploading(false);
@@ -137,41 +181,8 @@ export default function ProfilePage() {
     }
   };
 
-  // Atualizar profile quando user mudar
+  // Carregar dados do perfil do usuário
   useEffect(() => {
-    // Função para carregar o avatar do usuário
-    const loadAvatar = async () => {
-      if (!user) return;
-
-      try {
-        // Buscar o avatar do user_metadata ou do storage
-        const avatarUrl = user.user_metadata?.avatar_url;
-
-        if (avatarUrl) {
-          setAvatar(avatarUrl);
-        } else {
-          // Tentar buscar no storage usando o ID do usuário
-          const { data } = supabase.storage
-            .from("avatars")
-            .getPublicUrl(`${user.id}.jpg`);
-
-          if (data?.publicUrl) {
-            // Verificar se o arquivo existe fazendo uma requisição HEAD
-            try {
-              const response = await fetch(data.publicUrl, { method: "HEAD" });
-              if (response.ok) {
-                setAvatar(data.publicUrl);
-              }
-            } catch {
-              // Avatar não existe, mantém null
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao carregar avatar:", error);
-      }
-    };
-
     if (user) {
       const userName =
         user.user_metadata?.full_name ||
@@ -189,9 +200,6 @@ export default function ProfilePage() {
         company: user.user_metadata?.company || prev.company,
         joinDate: new Date(user.created_at).getFullYear().toString(),
       }));
-
-      // Carregar avatar
-      loadAvatar();
     }
   }, [user]);
 
@@ -209,7 +217,6 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      // Salvar os metadados do usuário no Supabase
       if (user) {
         const { data, error } = await supabase.auth.updateUser({
           data: {
@@ -227,7 +234,8 @@ export default function ProfilePage() {
           return;
         }
 
-        console.log("Perfil atualizado com sucesso:", data);
+        console.log("Perfil atualizado:", data);
+        alert("Perfil salvo com sucesso! ✅");
       }
 
       setIsEditing(false);
@@ -238,7 +246,6 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    // Restaurar dados originais do usuário
     if (user) {
       const userName =
         user.user_metadata?.full_name ||
@@ -286,21 +293,6 @@ export default function ProfilePage() {
           <div className="lg:col-span-1">
             <div className="card-glass-medium p-6 rounded-xl text-center">
               <div className="relative mb-6">
-                <div className="w-32 h-32 mx-auto glass-accent rounded-full flex items-center justify-center animate-liquid overflow-hidden">
-                  {avatar ? (
-                    <Image
-                      src={avatar}
-                      alt="Avatar do usuário"
-                      width={128}
-                      height={128}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <span className="text-6xl">👨‍💼</span>
-                  )}
-                </div>
-
                 {/* Input oculto para seleção de arquivo */}
                 <input
                   type="file"
@@ -310,18 +302,36 @@ export default function ProfilePage() {
                   className="hidden"
                 />
 
-                {/* Botão para upload */}
+                {/* Foto clicável */}
                 <button
                   onClick={() =>
                     document.getElementById("avatar-upload")?.click()
                   }
                   disabled={isUploading}
-                  className="absolute bottom-2 right-1/2 transform translate-x-6 w-10 h-10 glass-subtle rounded-full flex items-center justify-center hover:glass-accent transition-all group cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-32 h-32 mx-auto glass-accent rounded-full flex items-center justify-center animate-liquid overflow-hidden hover:opacity-80 transition-opacity cursor-pointer disabled:cursor-not-allowed relative group"
+                  title={
+                    isUploading ? "Enviando..." : "Clique para alterar a foto"
+                  }
                 >
-                  {isUploading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  {avatar ? (
+                    <Image
+                      src={avatar}
+                      alt="Avatar do usuário"
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                      key={avatar}
+                    />
                   ) : (
-                    <span className="text-lg group-hover:text-white">📷</span>
+                    <span className="text-6xl">👨‍💼</span>
+                  )}
+
+                  {/* Indicador de loading */}
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                   )}
                 </button>
               </div>
@@ -422,18 +432,7 @@ export default function ProfilePage() {
                   <label className="block text-sm font-medium text-muted mb-2">
                     E-mail
                   </label>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={profile.email}
-                      onChange={(e) =>
-                        setProfile({ ...profile, email: e.target.value })
-                      }
-                      className="w-full px-4 py-3 glass-subtle rounded-lg text-primary placeholder-muted border-0 focus:outline-none focus:ring-2 focus:ring-accent-primary"
-                    />
-                  ) : (
-                    <p className="text-primary font-medium">{profile.email}</p>
-                  )}
+                  <p className="text-primary font-medium">{profile.email}</p>
                 </div>
 
                 <div>

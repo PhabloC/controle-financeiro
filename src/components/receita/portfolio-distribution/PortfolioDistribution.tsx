@@ -1,11 +1,5 @@
-import {
-  Investment,
-  InvestmentSummary,
-} from "../../../app/pages/revenue/types";
-
-interface PortfolioDistributionProps {
-  summary: InvestmentSummary;
-}
+import { Investment } from "../../../app/pages/revenue/types";
+import { PortfolioDistributionProps } from "./types";
 
 export default function PortfolioDistribution({
   summary,

@@ -1,10 +1,5 @@
 import { Investment } from "../../../app/pages/revenue/types";
-
-interface PortfolioListProps {
-  investments: Investment[];
-  onRemoveInvestment: (id: string) => void;
-  onEditInvestment: (investment: Investment) => void;
-}
+import { PortfolioListProps } from "./types";
 
 export default function PortfolioList({
   investments,
@@ -63,8 +58,9 @@ export default function PortfolioList({
         ) : (
           investments.map((investment) => {
             const totalInvested =
-              investment.quantity * investment.purchasePrice;
-            const currentValue = investment.quantity * investment.currentPrice;
+              Number(investment.quantity) * Number(investment.purchasePrice);
+            const currentValue =
+              Number(investment.quantity) * Number(investment.currentPrice);
             const gain = currentValue - totalInvested;
             const gainPercent =
               totalInvested > 0 ? (gain / totalInvested) * 100 : 0;
@@ -93,7 +89,7 @@ export default function PortfolioList({
                     </div>
                     <div className="text-xs text-muted">
                       {investment.quantity} cotas • Compra: R${" "}
-                      {investment.purchasePrice.toFixed(2)} •{" "}
+                      {Number(investment.purchasePrice).toFixed(2)} •{" "}
                       {investment.purchaseDate}
                     </div>
                   </div>

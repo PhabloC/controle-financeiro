@@ -1,3 +1,4 @@
+import { Ativo, NovoAtivo } from "@/app/pages/revenue/types";
 import { AuthError, Session, User } from "@supabase/supabase-js";
 
 export interface AuthContextType {
@@ -18,4 +19,18 @@ export interface AuthContextType {
 
 export interface AuthProviderProps {
   children: React.ReactNode;
+}
+
+export interface UseAtivosReturn {
+  ativos: Ativo[];
+  loading: boolean;
+  error: string | null;
+  totalInvestido: number;
+  distribuicao: {
+    [key: string]: { quantidade: number; valorTotal: number };
+  } | null;
+  adicionarAtivo: (ativo: NovoAtivo) => Promise<boolean>;
+  editarAtivo: (id: number, ativo: Partial<NovoAtivo>) => Promise<boolean>;
+  removerAtivo: (id: number) => Promise<boolean>;
+  recarregarAtivos: () => Promise<void>;
 }

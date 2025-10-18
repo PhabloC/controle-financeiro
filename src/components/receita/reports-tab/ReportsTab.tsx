@@ -1,11 +1,5 @@
-import {
-  Investment,
-  InvestmentSummary,
-} from "../../../app/pages/revenue/types";
-
-interface ReportsTabProps {
-  summary: InvestmentSummary;
-}
+import { Investment } from "../../../app/pages/revenue/types";
+import { ReportsTabProps } from "./types";
 
 export default function ReportsTab({ summary }: ReportsTabProps) {
   const getTypeColor = (type: Investment["type"]) => {

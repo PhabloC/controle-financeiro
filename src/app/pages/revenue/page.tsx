@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Investment, InvestmentSummary } from "./types";
+import { useState, useMemo } from "react";
+import { Ativo, NovoAtivo, Investment, InvestmentSummary } from "./types";
+import { useFinancial } from "../../../contexts/FinancialContext";
 import {
   RevenueHeader,
   FinancialSummary,
@@ -14,24 +15,31 @@ import {
 
 export default function Revenue() {
   const [selectedTab, setSelectedTab] = useState("Portfolio");
-  const [investments, setInvestments] = useState<Investment[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(
-    null
-  );
+  const [editingAtivo, setEditingAtivo] = useState<Ativo | null>(null);
 
-  const [newInvestment, setNewInvestment] = useState({
-    name: "",
-    symbol: "",
-    type: "Ação" as Investment["type"],
-    quantity: 0,
-    purchasePrice: 0,
-    purchaseDate: new Date().toISOString().split("T")[0],
-  });
+  const { ativos, error, adicionarAtivo, editarAtivo, removerAtivo } =
+    useFinancial();
 
-  // Calcular resumo dos investimentos
-  const calculateSummary = (): InvestmentSummary => {
+  // Converter ativos do Supabase para formato dos componentes existentes
+  const investments: Investment[] = useMemo(() => {
+    return ativos.map((ativo) => ({
+      id: ativo.id?.toString() || "",
+      name: ativo.nome_ativo,
+      symbol: ativo.nome_ativo.substring(0, 6).toUpperCase(),
+      type: ativo.tipo,
+      quantity: Number(ativo.quantidade) || 0,
+      purchasePrice: Number(ativo.preco_medio) || 0,
+      currentPrice: Number(ativo.preco_medio) || 0, // Por enquanto, mesmo valor
+      purchaseDate: ativo.criado_em
+        ? new Date(ativo.criado_em).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+    }));
+  }, [ativos]);
+
+  // Calcular resumo dos investimentos no formato dos componentes existentes
+  const summary: InvestmentSummary = useMemo(() => {
     let totalInvested = 0;
     let currentValue = 0;
     const byType: InvestmentSummary["byType"] = {};
@@ -75,109 +83,108 @@ export default function Revenue() {
       totalGainPercent,
       byType,
     };
+  }, [investments]);
+
+  // Estados para o formulário de adição (compatibilidade com componentes existentes)
+  const [newInvestment, setNewInvestment] = useState({
+    name: "",
+    symbol: "",
+    type: "Ação" as Investment["type"],
+    quantity: 0,
+    purchasePrice: 0,
+    purchaseDate: new Date().toISOString().split("T")[0],
+  });
+
+  const showSuccessMsg = (message: string) => {
+    setSuccessMessage(message);
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
   };
 
-  const summary = calculateSummary();
-
-  const handleAddInvestment = () => {
+  // Funções para trabalhar com o formulário de investimento existente
+  const handleAddInvestment = async () => {
     if (
       newInvestment.name.trim() &&
-      newInvestment.symbol.trim() &&
       newInvestment.quantity > 0 &&
       newInvestment.purchasePrice > 0
     ) {
-      const investment: Investment = {
-        id: Date.now().toString(),
-        ...newInvestment,
-        name: newInvestment.name.trim(),
-        symbol: newInvestment.symbol.trim().toUpperCase(),
-        currentPrice: newInvestment.purchasePrice, // Inicialmente igual ao preço de compra
+      const novoAtivo: NovoAtivo = {
+        user_id: "", // Será preenchido pelo hook
+        nome_ativo: newInvestment.name.trim(),
+        tipo: newInvestment.type,
+        quantidade: newInvestment.quantity,
+        preco_medio: newInvestment.purchasePrice,
       };
 
-      setInvestments([...investments, investment]);
-      setNewInvestment({
-        name: "",
-        symbol: "",
-        type: "Ação",
-        quantity: 0,
-        purchasePrice: 0,
-        purchaseDate: new Date().toISOString().split("T")[0],
-      });
-
-      // Mostrar mensagem de sucesso e voltar para o Portfolio
-      setSuccessMessage("Investimento adicionado com sucesso!");
-      setShowSuccessMessage(true);
-      setSelectedTab("Portfolio");
-
-      // Ocultar mensagem de sucesso após 3 segundos
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 3000);
+      const sucesso = await adicionarAtivo(novoAtivo);
+      if (sucesso) {
+        setNewInvestment({
+          name: "",
+          symbol: "",
+          type: "Ação",
+          quantity: 0,
+          purchasePrice: 0,
+          purchaseDate: new Date().toISOString().split("T")[0],
+        });
+        showSuccessMsg("Investimento adicionado com sucesso!");
+        setSelectedTab("Portfolio");
+      }
     }
   };
 
   const handleEditInvestment = (investment: Investment) => {
-    setEditingInvestment(investment);
-    setNewInvestment({
-      name: investment.name,
-      symbol: investment.symbol,
-      type: investment.type,
-      quantity: investment.quantity,
-      purchasePrice: investment.purchasePrice,
-      purchaseDate: investment.purchaseDate,
-    });
-    setSelectedTab("Adicionar");
+    // Encontrar o ativo correspondente
+    const ativo = ativos.find((a) => a.id?.toString() === investment.id);
+    if (ativo) {
+      setEditingAtivo(ativo);
+      setNewInvestment({
+        name: investment.name,
+        symbol: investment.symbol,
+        type: investment.type,
+        quantity: investment.quantity,
+        purchasePrice: investment.purchasePrice,
+        purchaseDate: investment.purchaseDate,
+      });
+      setSelectedTab("Adicionar");
+    }
   };
 
-  const handleUpdateInvestment = () => {
+  const handleUpdateInvestment = async () => {
     if (
-      editingInvestment &&
+      editingAtivo &&
+      editingAtivo.id &&
       newInvestment.name.trim() &&
-      newInvestment.symbol.trim() &&
       newInvestment.quantity > 0 &&
       newInvestment.purchasePrice > 0
     ) {
-      const updatedInvestment: Investment = {
-        ...editingInvestment,
-        name: newInvestment.name.trim(),
-        symbol: newInvestment.symbol.trim().toUpperCase(),
-        type: newInvestment.type,
-        quantity: newInvestment.quantity,
-        purchasePrice: newInvestment.purchasePrice,
-        purchaseDate: newInvestment.purchaseDate,
+      const ativoAtualizado: Partial<NovoAtivo> = {
+        nome_ativo: newInvestment.name.trim(),
+        tipo: newInvestment.type,
+        quantidade: newInvestment.quantity,
+        preco_medio: newInvestment.purchasePrice,
       };
 
-      setInvestments(
-        investments.map((inv) =>
-          inv.id === editingInvestment.id ? updatedInvestment : inv
-        )
-      );
-
-      // Limpar estado de edição
-      setEditingInvestment(null);
-      setNewInvestment({
-        name: "",
-        symbol: "",
-        type: "Ação",
-        quantity: 0,
-        purchasePrice: 0,
-        purchaseDate: new Date().toISOString().split("T")[0],
-      });
-
-      // Mostrar mensagem de sucesso e voltar para o Portfolio
-      setSuccessMessage("Investimento atualizado com sucesso!");
-      setShowSuccessMessage(true);
-      setSelectedTab("Portfolio");
-
-      // Ocultar mensagem de sucesso após 3 segundos
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 3000);
+      const sucesso = await editarAtivo(editingAtivo.id, ativoAtualizado);
+      if (sucesso) {
+        setEditingAtivo(null);
+        setNewInvestment({
+          name: "",
+          symbol: "",
+          type: "Ação",
+          quantity: 0,
+          purchasePrice: 0,
+          purchaseDate: new Date().toISOString().split("T")[0],
+        });
+        showSuccessMsg("Investimento atualizado com sucesso!");
+        setSelectedTab("Portfolio");
+      }
     }
   };
 
   const handleCancelEdit = () => {
-    setEditingInvestment(null);
+    setEditingAtivo(null);
     setNewInvestment({
       name: "",
       symbol: "",
@@ -189,9 +196,31 @@ export default function Revenue() {
     setSelectedTab("Portfolio");
   };
 
-  const handleRemoveInvestment = (id: string) => {
-    setInvestments(investments.filter((inv) => inv.id !== id));
+  const handleRemoveInvestment = async (id: string) => {
+    const ativo = ativos.find((a) => a.id?.toString() === id);
+    if (ativo && ativo.id) {
+      const sucesso = await removerAtivo(ativo.id);
+      if (sucesso) {
+        showSuccessMsg("Investimento removido com sucesso!");
+      }
+    }
   };
+
+  // Converter ativo para formato de edição do componente existente
+  const editingInvestment = editingAtivo
+    ? {
+        id: editingAtivo.id?.toString() || "",
+        name: editingAtivo.nome_ativo,
+        symbol: editingAtivo.nome_ativo.substring(0, 6).toUpperCase(),
+        type: editingAtivo.tipo,
+        quantity: editingAtivo.quantidade,
+        purchasePrice: editingAtivo.preco_medio,
+        currentPrice: editingAtivo.preco_medio,
+        purchaseDate: editingAtivo.criado_em
+          ? new Date(editingAtivo.criado_em).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+      }
+    : null;
 
   const tabs = ["Portfolio", "Adicionar", "Relatórios"];
 
@@ -200,6 +229,16 @@ export default function Revenue() {
       <RevenueHeader onAddInvestmentClick={() => setSelectedTab("Adicionar")} />
 
       <FinancialSummary summary={summary} />
+
+      {/* Mensagem de Erro */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <span className="text-red-400">✕</span>
+            <span className="text-red-400 font-medium">{error}</span>
+          </div>
+        </div>
+      )}
 
       {/* Mensagem de Sucesso */}
       {showSuccessMessage && (

@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
+import { useAvatar } from "@/hooks/useAvatar";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = useState("Overview");
@@ -10,6 +12,7 @@ export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const { avatar } = useAvatar();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,11 +69,26 @@ export default function Sidebar() {
       {/* Header */}
       <div className="p-6 border-b border-dark-tertiary">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 glass-accent rounded-lg flex items-center justify-center animate-liquid">
-            <span className="text-white font-bold text-lg">💰</span>
+          <div className="w-10 h-10 glass-accent rounded-full flex items-center justify-center animate-liquid overflow-hidden">
+            {avatar ? (
+              <Image
+                src={avatar}
+                alt="Avatar do usuário"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                unoptimized
+                key={avatar}
+              />
+            ) : (
+              <span className="text-white font-bold text-lg">�</span>
+            )}
           </div>
           <span className="text-xl font-semibold text-primary">
-            Puxar nome do perfil
+            {user?.user_metadata?.full_name ||
+              user?.user_metadata?.name ||
+              user?.email?.split("@")[0] ||
+              "Controle Financeiro"}
           </span>
         </div>
       </div>

@@ -1,8 +1,4 @@
-interface NavigationTabsProps {
-  tabs: string[];
-  selectedTab: string;
-  onTabChange: (tab: string) => void;
-}
+import { NavigationTabsProps } from "./types";
 
 export default function NavigationTabs({
   tabs,

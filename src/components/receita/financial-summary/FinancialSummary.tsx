@@ -1,8 +1,4 @@
-import { InvestmentSummary } from "../../../app/pages/revenue/types";
-
-interface FinancialSummaryProps {
-  summary: InvestmentSummary;
-}
+import { FinancialSummaryProps } from "./types";
 
 export default function FinancialSummary({ summary }: FinancialSummaryProps) {
   return (

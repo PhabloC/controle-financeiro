@@ -11,6 +11,26 @@ export interface Investment {
   exchange?: string;
 }
 
+// Tipos que correspondem à tabela do Supabase
+export interface Ativo {
+  id?: number;
+  user_id: string;
+  nome_ativo: string;
+  tipo: "Ação" | "FII" | "Renda Fixa" | "Cripto" | "Internacional";
+  quantidade: number;
+  preco_medio: number;
+  criado_em?: string;
+}
+
+// Tipo para inserir novos ativos (sem campos auto-gerados)
+export interface NovoAtivo {
+  user_id: string;
+  nome_ativo: string;
+  tipo: "Ação" | "FII" | "Renda Fixa" | "Cripto" | "Internacional";
+  quantidade: number;
+  preco_medio: number;
+}
+
 export interface InvestmentSummary {
   totalInvested: number;
   currentValue: number;
