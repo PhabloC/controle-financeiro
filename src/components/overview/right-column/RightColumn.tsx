@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useFinancial } from "@/contexts/FinancialContext";
 import EditMetaModal from "@/components/ui/EditMetaModal";
+import { LineChart } from "@/components/charts";
+import { CalendarIcon, MoneyIcon } from "@/svg";
 
 export default function RightColumn() {
   const { metrics, metaAnual, atualizarMetaAnual, loading } = useFinancial();
   const [showEditModal, setShowEditModal] = useState(false);
+  const router = useRouter();
+
+  const handleNovoAporte = () => {
+    router.push("/pages/revenue?tab=Adicionar");
+  };
 
   if (loading) {
     return (
@@ -32,20 +40,34 @@ export default function RightColumn() {
 
   const progressoMeta = (metrics.totalInvestido / metaAnual) * 100;
 
+  // Dados simulados para o gráfico de evolução da receita mensal
+  const receitaEvolution = [
+    { label: "Mai", value: metrics.receitaMensal * 0.6 },
+    { label: "Jun", value: metrics.receitaMensal * 0.72 },
+    { label: "Jul", value: metrics.receitaMensal * 0.85 },
+    { label: "Ago", value: metrics.receitaMensal * 0.93 },
+    { label: "Set", value: metrics.receitaMensal * 0.97 },
+    { label: "Out", value: metrics.receitaMensal },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="card-glass-light p-6 rounded-xl">
         <h3 className="text-sm font-medium text-muted mb-2">
-          Receita (Outubro)
+          Receita (
+          {new Date()
+            .toLocaleDateString("pt-BR", { month: "long" })
+            .charAt(0)
+            .toUpperCase() +
+            new Date().toLocaleDateString("pt-BR", { month: "long" }).slice(1)}
+          )
         </h3>
         <div className="text-2xl font-bold text-primary mb-2">
           {formatCurrency(metrics.receitaMensal)}
         </div>
-        <div className="h-16 bg-dark-secondary rounded-lg mb-2 relative overflow-hidden">
-          <div className="absolute bottom-0 left-0 w-full h-8 glass-accent rounded-lg"></div>
-        </div>
-        <p className="text-sm text-muted">
-          💰 Estimativa baseada em rendimentos
+        <LineChart data={receitaEvolution} color="#10B981" showGrid={false} />
+        <p className="flex items-center gap-2 mt-5 text-sm text-muted">
+          <MoneyIcon /> Estimativa baseada em rendimentos
         </p>
       </div>
 
@@ -71,7 +93,10 @@ export default function RightColumn() {
             ? " Continue aportando para bater sua meta!"
             : " Meta atingida! 🎉"}
         </p>
-        <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer">
+        <button
+          onClick={handleNovoAporte}
+          className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+        >
           Novo Aporte
         </button>
       </div>
@@ -121,7 +146,9 @@ export default function RightColumn() {
 
       <div className="bg-gradient-to-r from-orange-400 to-red-400 p-6 rounded-xl text-white">
         <div className="flex items-center mb-3">
-          <span className="text-2xl mr-2">📊</span>
+          <span className="text-2xl mr-2">
+            <CalendarIcon />
+          </span>
           <span className="text-sm font-medium">Análise de Portfólio</span>
         </div>
         <p className="text-sm opacity-90 mb-4">

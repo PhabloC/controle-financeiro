@@ -1,3 +1,4 @@
+import { TargetIcon } from "@/svg";
 import { FinancialSummaryProps } from "./types";
 
 export default function FinancialSummary({ summary }: FinancialSummaryProps) {
@@ -53,7 +54,9 @@ export default function FinancialSummary({ summary }: FinancialSummaryProps) {
         <div className="text-2xl font-bold text-primary mb-1">
           {Object.keys(summary.byType).length}
         </div>
-        <p className="text-sm text-purple-400">🎯 Tipos de ativos</p>
+        <p className="flex gap-2 items-center text-sm text-purple-400">
+          <TargetIcon /> Tipos de ativos
+        </p>
       </div>
     </div>
   );

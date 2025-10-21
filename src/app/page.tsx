@@ -14,7 +14,7 @@ export default function Home() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-primary mb-2">
-            💰 Bem-vindo ao Controle Financeiro
+            Bem-vindo ao Controle Financeiro
           </h1>
           <p className="text-muted">
             Gerencie seus investimentos e acompanhe sua evolução financeira

@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
-/* ===== VARIÁVEIS DE CORES ===== */
+@theme {
+  --font-family-sans: var(--font-poppins), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 :root {
   /* Cores principais do tema escuro */
   --color-dark-primary: #111827; /* gray-900 */

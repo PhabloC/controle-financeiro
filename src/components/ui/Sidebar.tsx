@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useAvatar } from "@/hooks/useAvatar";
+import { CalendarIcon, HomeIcon, LogoutIcon, MoneyIcon, UserIcon } from "@/svg";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = useState("Overview");
@@ -104,16 +105,20 @@ export default function Sidebar() {
             {[
               {
                 name: "Home",
-                icon: "🏠",
+                icon: <HomeIcon size={20} />,
                 path: "/",
               },
               {
                 name: "Overview",
-                icon: "📊",
+                icon: <CalendarIcon size={20} />,
                 path: "/pages/overview",
               },
 
-              { name: "Receita", icon: "💰", path: "/pages/revenue" },
+              {
+                name: "Receita",
+                icon: <MoneyIcon size={20} />,
+                path: "/pages/revenue",
+              },
             ].map((item) => (
               <button
                 key={item.name}
@@ -205,7 +210,9 @@ export default function Sidebar() {
                   : "text-secondary hover:bg-gradient-to-r hover:from-gray-500/10 hover:to-gray-400/10 hover:text-primary"
               }`}
             >
-              <span className="text-lg">👤</span>
+              <span className="text-lg">
+                <UserIcon size={20} />
+              </span>
               <span className="text-sm font-medium">Perfil</span>
               {activeItem === "Perfil" && (
                 <div className="ml-auto w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
@@ -221,7 +228,9 @@ export default function Sidebar() {
               }}
               className="cursor-pointer w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-200 text-secondary hover:bg-gradient-to-r hover:from-red-500/10 hover:to-red-400/10 hover:text-red-400"
             >
-              <span className="text-lg">🚪</span>
+              <span className="text-lg">
+                <LogoutIcon size={20} />
+              </span>
               <span className="text-sm font-medium">Sair</span>
             </button>
           </div>

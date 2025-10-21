@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 import { useAvatar } from "@/hooks/useAvatar";
 import { supabase } from "@/lib/supabase";
+import { UserIcon } from "@/svg";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -273,7 +274,9 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">👤 Perfil</h1>
+          <h1 className="flex gap-2 items-center text-3xl font-bold text-primary">
+            <UserIcon size={30} /> Perfil
+          </h1>
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(!isEditing)}

@@ -1,0 +1,16 @@
+// Exportando todos os ícones SVG
+export { HomeIcon } from "./HomeIcon";
+export { DashboardIcon } from "./DashboardIcon";
+export { MoneyIcon } from "./MoneyIcon";
+export { ChartIcon } from "./ChartIcon";
+export { UserIcon } from "./UserIcon";
+export { SettingsIcon } from "./SettingsIcon";
+export { ReportsIcon } from "./ReportsIcon";
+export { PlusIcon } from "./PlusIcon";
+export { ArrowRightIcon } from "./ArrowRightIcon";
+export { LogoutIcon } from "./LogoutIcon";
+export { SearchIcon } from "./SearchIcon";
+export { EditIcon } from "./EditIcon";
+export { DeleteIcon } from "./DeleteIcon";
+export { CalendarIcon } from "./CalendarIcon";
+export { TargetIcon } from "./TargetIcon";

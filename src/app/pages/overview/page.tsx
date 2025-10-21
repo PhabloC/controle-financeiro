@@ -14,7 +14,7 @@ export default function Overview() {
       <div className="p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">📊 Overview</h1>
+          <h1 className="text-3xl font-bold text-primary"> Overview</h1>
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}

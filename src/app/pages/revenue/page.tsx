@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Ativo, NovoAtivo, Investment, InvestmentSummary } from "./types";
 import { useFinancial } from "../../../contexts/FinancialContext";
 import {
@@ -14,10 +15,20 @@ import {
 } from "../../../components/receita";
 
 export default function Revenue() {
-  const [selectedTab, setSelectedTab] = useState("Portfolio");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "Portfolio";
+  const [selectedTab, setSelectedTab] = useState(initialTab);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [editingAtivo, setEditingAtivo] = useState<Ativo | null>(null);
+
+  // Atualizar tab quando a query string mudar
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["Portfolio", "Adicionar", "Relatórios"].includes(tab)) {
+      setSelectedTab(tab);
+    }
+  }, [searchParams]);
 
   const { ativos, error, adicionarAtivo, editarAtivo, removerAtivo } =
     useFinancial();

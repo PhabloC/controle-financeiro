@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFinancial } from "@/contexts/FinancialContext";
 import EditMetaModal from "@/components/ui/EditMetaModal";
 import { InvestmentGoalsProps } from "./types";
+import { TargetIcon } from "@/svg";
 
 export default function InvestmentGoals({
   currentValue,
@@ -18,7 +19,9 @@ export default function InvestmentGoals({
       <div className="bg-gradient-to-r from-green-400 to-teal-500 p-6 rounded-xl text-white">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
-            <span className="text-2xl mr-2">🎯</span>
+            <span className="text-2xl mr-2">
+              <TargetIcon />
+            </span>
             <span className="text-sm font-medium">Meta Anual 2025</span>
           </div>
           <button
