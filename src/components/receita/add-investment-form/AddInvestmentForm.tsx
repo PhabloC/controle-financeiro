@@ -132,11 +132,21 @@ export default function AddInvestmentForm({
               }
               className="w-full px-3 py-2 glass-subtle rounded-lg text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-0"
             >
-              <option value="Ação">Ação</option>
-              <option value="FII">FII</option>
-              <option value="Renda Fixa">Renda Fixa</option>
-              <option value="Cripto">Cripto</option>
-              <option value="Internacional">Internacional</option>
+              <option value="Ação" className="bg-gray-800 text-white">
+                Ação
+              </option>
+              <option value="FII" className="bg-gray-800 text-white">
+                FII
+              </option>
+              <option value="Renda Fixa" className="bg-gray-800 text-white">
+                Renda Fixa
+              </option>
+              <option value="Cripto" className="bg-gray-800 text-white">
+                Cripto
+              </option>
+              <option value="Internacional" className="bg-gray-800 text-white">
+                Internacional
+              </option>
             </select>
           </div>
 

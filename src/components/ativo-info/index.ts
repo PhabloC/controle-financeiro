@@ -1,0 +1,1 @@
+export { AtivoInfoDisplay } from "./AtivoInfoDisplay";

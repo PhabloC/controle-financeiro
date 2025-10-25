@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Ativo, NovoAtivo, Investment, InvestmentSummary } from "./types";
 import { useFinancial } from "../../../contexts/FinancialContext";
@@ -8,13 +8,13 @@ import {
   RevenueHeader,
   FinancialSummary,
   NavigationTabs,
-  PortfolioList,
   AddInvestmentForm,
   ReportsTab,
   RevenueSidebar,
 } from "../../../components/receita";
+import { PortfolioListWithRealTime } from "../../../components/receita/portfolio-list";
 
-export default function Revenue() {
+function RevenueContent() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "Portfolio";
   const [selectedTab, setSelectedTab] = useState(initialTab);
@@ -233,6 +233,18 @@ export default function Revenue() {
       }
     : null;
 
+  // Wrapper para lidar com a mudança de investimento
+  const handleInvestmentChange = (investment: {
+    name: string;
+    symbol: string;
+    type: Investment["type"];
+    quantity: number;
+    purchasePrice: number;
+    purchaseDate: string;
+  }) => {
+    setNewInvestment(investment);
+  };
+
   const tabs = ["Portfolio", "Adicionar", "Relatórios"];
 
   return (
@@ -272,7 +284,7 @@ export default function Revenue() {
         {/* Conteúdo Principal */}
         <div className="lg:col-span-2">
           {selectedTab === "Portfolio" && (
-            <PortfolioList
+            <PortfolioListWithRealTime
               investments={investments}
               onRemoveInvestment={handleRemoveInvestment}
               onEditInvestment={handleEditInvestment}
@@ -282,7 +294,7 @@ export default function Revenue() {
           {selectedTab === "Adicionar" && (
             <AddInvestmentForm
               newInvestment={newInvestment}
-              onInvestmentChange={setNewInvestment}
+              onInvestmentChange={handleInvestmentChange}
               onAddInvestment={handleAddInvestment}
               onUpdateInvestment={handleUpdateInvestment}
               onCancelEdit={handleCancelEdit}
@@ -297,5 +309,22 @@ export default function Revenue() {
         <RevenueSidebar summary={summary} />
       </div>
     </div>
+  );
+}
+
+export default function Revenue() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      }
+    >
+      <RevenueContent />
+    </Suspense>
   );
 }

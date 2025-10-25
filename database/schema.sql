@@ -6,9 +6,13 @@ CREATE TABLE IF NOT EXISTS public.ativos (
     tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('Ação', 'FII', 'Renda Fixa', 'Cripto', 'Internacional')),
     quantidade DECIMAL(15,8) NOT NULL CHECK (quantidade > 0),
     preco_medio DECIMAL(15,2) NOT NULL CHECK (preco_medio > 0),
+    url_investing TEXT, -- URL do Investing.com para buscar preços atualizados
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Adicionar coluna url_investing se ela não existir (para bancos existentes)
+ALTER TABLE public.ativos ADD COLUMN IF NOT EXISTS url_investing TEXT;
 
 -- Índices para melhorar performance
 CREATE INDEX IF NOT EXISTS idx_ativos_user_id ON public.ativos(user_id);

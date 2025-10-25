@@ -8,6 +8,7 @@ export interface AddInvestmentFormProps {
     quantity: number;
     purchasePrice: number;
     purchaseDate: string;
+    urlInvesting?: string;
   };
   onInvestmentChange: (investment: {
     name: string;
@@ -16,6 +17,7 @@ export interface AddInvestmentFormProps {
     quantity: number;
     purchasePrice: number;
     purchaseDate: string;
+    urlInvesting?: string;
   }) => void;
   onAddInvestment: () => void;
   onUpdateInvestment?: () => void;
